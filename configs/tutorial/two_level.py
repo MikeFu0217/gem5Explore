@@ -6,38 +6,15 @@ import m5
 from m5.objects import *
 
 # --------------------------- options ---------------------------#
-parser = argparse.ArgumentParser(
-    description="A simple system with 2-level cache."
-)
-parser.add_argument(
-    "--isa",
-    default="X86",
-    nargs="?",
-    type=str,
-    help="Instruction set architecture. Choose from what you have built. Default is X86",
-)
-parser.add_argument(
-    "--bin",
-    default="tests/x86/hello/hello",
-    nargs="?",
-    type=str,
-    help="Path to the binary to execute.",
-)
-parser.add_argument(
-    "--clk",
-    default="1GHz",
-    nargs="?",
-    type=str,
-    help="Clock frequency. Default is 1GHz",
-)
-parser.add_argument(
-    "--l1i_size", help=f"L1 instruction cache size. Default: 16kB."
-)
-parser.add_argument(
-    "--l1d_size", help="L1 data cache size. Default: Default: 64kB."
-)
+parser = argparse.ArgumentParser(description="A simple system with Timing Simple CPU.")
+parser.add_argument("--isa", default="X86", nargs="?", type=str, help="Instruction set architecture. Choose from what you have built. Default is X86")
+parser.add_argument("--bin", default="tests/x86/hello/hello", nargs="?", type=str, help="Path to the binary to execute.")
+parser.add_argument("--clk", default="1GHz", nargs="?", type=str, help="Clock frequency. Default is 1GHz")
+parser.add_argument("--cpu", default="TimingSimpleCPU", nargs="?", type=str, help="CPU Type. Default is TimingSimpleCPU")
+parser.add_argument("--dram", default="DDR3_1600_8x8", nargs="?", type=str, help="DRAM type. Default is DDR3_1600_8x8")
+parser.add_argument("--l1i_size", help=f"L1 instruction cache size. Default: 16kB.")
+parser.add_argument("--l1d_size", help="L1 data cache size. Default: Default: 64kB.")
 parser.add_argument("--l2_size", help="L2 cache size. Default: 256kB.")
-
 options = parser.parse_args()
 # --------------------------- options ---------------------------#
 
@@ -50,14 +27,9 @@ system.clk_domain.voltage_domain = VoltageDomain()
 system.mem_mode = "timing"
 system.mem_ranges = [AddrRange("512MB")]
 
-if options.isa == "X86":
-    system.cpu = X86TimingSimpleCPU()
-elif options.isa == "ARM":
-    system.cpu = ArmTimingSimpleCPU()
-elif options.isa == "RISCV":
-    system.cpu = RiscvTimingSimpleCPU()
-else:
-    raise ValueError("{} is not supported ISA.".format(options.isa))
+# cpu
+cpuName = f"{options.isa}".capitalize() + f"{options.cpu}"
+system.cpu = globals()[cpuName]()
 
 # create L1 caches
 system.cpu.icache = L1ICache(options)
@@ -90,7 +62,7 @@ if options.isa == "X86":
 system.system_port = system.membus.cpu_side_ports
 
 system.mem_ctrl = MemCtrl()
-system.mem_ctrl.dram = DDR3_1600_8x8()
+system.mem_ctrl.dram = globals()[f"{options.dram}"]()
 system.mem_ctrl.dram.range = system.mem_ranges[0]
 system.mem_ctrl.port = system.membus.mem_side_ports
 

@@ -5,31 +5,12 @@ import sys
 import argparse
 
 # --------------------------- options ---------------------------#
-parser = argparse.ArgumentParser(
-    description="A simple system with Timing Simple CPU."
-)
-parser.add_argument(
-    "--isa",
-    default="X86",
-    nargs="?",
-    type=str,
-    help="Instruction set architecture. Choose from what you have built. Default is X86",
-)
-parser.add_argument(
-    "--bin",
-    default="tests/x86/hello/hello",
-    nargs="?",
-    type=str,
-    help="Path to the binary to execute.",
-)
-parser.add_argument(
-    "--clk",
-    default="1GHz",
-    nargs="?",
-    type=str,
-    help="Clock frequency. Default is 1GHz",
-)
-
+parser = argparse.ArgumentParser(description="A simple system with Timing Simple CPU.")
+parser.add_argument("--isa", default="X86", nargs="?", type=str, help="Instruction set architecture. Choose from what you have built. Default is X86")
+parser.add_argument("--bin", default="tests/x86/hello/hello", nargs="?", type=str, help="Path to the binary to execute.")
+parser.add_argument("--clk", default="1GHz", nargs="?", type=str, help="Clock frequency. Default is 1GHz")
+parser.add_argument("--cpu", default="TimingSimpleCPU", nargs="?", type=str, help="CPU Type. Default is TimingSimpleCPU")
+parser.add_argument("--dram", default="DDR3_1600_8x8", nargs="?", type=str, help="DRAM type. Default is DDR3_1600_8x8")
 options = parser.parse_args()
 # --------------------------- options ---------------------------#
 
@@ -56,14 +37,8 @@ system.mem_ranges = [AddrRange("512MB")]
 # We will start with the most simple timing-based CPU in gem5 for the X86 ISA, X86TimingSimpleCPU.
 # This CPU model executes each instruction in a single clock cycle to execute, except memory requests, which flow through the memory system.
 
-if options.isa == "X86":
-    system.cpu = X86TimingSimpleCPU()
-elif options.isa == "ARM":
-    system.cpu = ArmTimingSimpleCPU()
-elif options.isa == "RISCV":
-    system.cpu = RiscvTimingSimpleCPU()
-else:
-    raise ValueError("{} is not supported ISA.".format(options.isa))
+cpuName = f"{options.isa}".capitalize() + f"{options.cpu}"
+system.cpu = globals()[cpuName]()
 
 # the system-wide memory bus
 
@@ -91,7 +66,7 @@ system.system_port = system.membus.cpu_side_ports
 # For this system, we’ll use a simple DDR3 controller and it will be responsible for the entire memory range of our system.
 
 system.mem_ctrl = MemCtrl()
-system.mem_ctrl.dram = DDR3_1600_8x8()
+system.mem_ctrl.dram = globals()[f"{options.dram}"]()
 system.mem_ctrl.dram.range = system.mem_ranges[0]
 system.mem_ctrl.port = system.membus.mem_side_ports
 
