@@ -22,7 +22,7 @@ args = parser.parse_args()
 # the working path should also be where you want to generate "m5out" folder.
 
 gem5_command = [
-    f"../gem5/build/{args.isa}/gem5.opt",
+    f"deps/gem5/build/{args.isa}/gem5.opt",
     args.cfg,
     f"--isa={args.isa}",
     f"--bin={args.bin}",

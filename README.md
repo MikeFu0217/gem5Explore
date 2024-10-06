@@ -1,6 +1,14 @@
 # Gem5 Explore
 
-To run this project, clone this repository under the same directory of gem5. (shoulder-by-shoulder)
+## Set up
+
+This project use soft link `ln -s <source> <target>` to include dependencies (gem5).
+
+```
+$ mkdir deps
+$ cd deps
+$ ln -s <gem5_source_dir> gem5
+```
 
 ## Run sim_simple.py with variable configurations
 
