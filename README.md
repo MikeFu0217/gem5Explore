@@ -37,3 +37,15 @@ A more detailed explanation on options:
 - `--clk`: Clock frequency. Used in script as `system.clk_domain.clock = [clk]`. You can choose like "1GHz", "3GHz" and so on.
 - `--cpu`: Choose from CPU Models supported by gem5. Used in script as `system.cpu = [cpu]`. Options contain: "TimingSimpleCPU" "MinorCPU" "O3CPU"...
 - `--dram`: Choose from dram support by gem5. Used in script as `system.mem_ctrl.dram = [dram]`.
+
+Examples:
+
+```
+$ python sim_simple.py
+```
+```
+$ python sim_simple.py --cfg=configs/tutorial/two_level.py --bin=tests/x86/sieve/sieve --clk=3GHz --cpu=MinorCPU
+```
+```
+$ python sim_simple.py --isa=ARM --cfg=configs/tutorial/two_level.py --bin=tests/arm/FloatMM --clk=3GHz --cpu=O3CPU --dram=DDR3_2133_8x8
+```
