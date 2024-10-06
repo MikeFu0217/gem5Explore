@@ -1,13 +1,35 @@
 import m5
 from m5.objects import *
 
+import sys
+import argparse
+
+parser = argparse.ArgumentParser(
+    description="A simple system with Timing Simple CPU."
+)
+parser.add_argument(
+    "--isa",
+    default="X86",
+    nargs="?",
+    type=str,
+    help="Instruction set architecture. Choose from what you have built. Default is X86",
+)
+parser.add_argument(
+    "--bin",
+    default="tests/x86/hello/hello",
+    nargs="?",
+    type=str,
+    help="Path to the binary to execute.",
+)
+options = parser.parse_args()
+
 # The System object will be the parent of all the other objects in our simulated system.
 # The System object contains a lot of functional (not timing level) information,
 # like the physical memory ranges, the root clock domain, the root voltage domain, the kernel (in full-system simulation), etc.
 
 system = System()
 
-# Set the clockon the system
+# Set the clock on the system
 
 system.clk_domain = SrcClockDomain()
 system.clk_domain.clock = "1GHz"
@@ -24,7 +46,14 @@ system.mem_ranges = [AddrRange("512MB")]
 # We will start with the most simple timing-based CPU in gem5 for the X86 ISA, X86TimingSimpleCPU.
 # This CPU model executes each instruction in a single clock cycle to execute, except memory requests, which flow through the memory system.
 
-system.cpu = ArmTimingSimpleCPU()
+if options.isa == "X86":
+    system.cpu = X86TimingSimpleCPU()
+elif options.isa == "ARM":
+    system.cpu = ArmTimingSimpleCPU()
+elif options.isa == "RISCV":
+    system.cpu = RiscvTimingSimpleCPU()
+else:
+    raise ValueError("{} is not supported ISA.".format(options.isa))
 
 # the system-wide memory bus
 
@@ -41,9 +70,10 @@ system.cpu.dcache_port = system.membus.cpu_side_ports
 # Other ISAs (e.g., ARM) do not require these 3 extra lines.
 
 system.cpu.createInterruptController()
-# system.cpu.interrupts[0].pio = system.membus.mem_side_ports
-# system.cpu.interrupts[0].int_requestor = system.membus.cpu_side_ports
-# system.cpu.interrupts[0].int_responder = system.membus.mem_side_ports
+if options.isa == "X86":
+    system.cpu.interrupts[0].pio = system.membus.mem_side_ports
+    system.cpu.interrupts[0].int_requestor = system.membus.cpu_side_ports
+    system.cpu.interrupts[0].int_responder = system.membus.mem_side_ports
 
 system.system_port = system.membus.cpu_side_ports
 
@@ -59,7 +89,8 @@ system.mem_ctrl.port = system.membus.mem_side_ports
 # Then we set the processes command to the command we want to run.
 # Then we set the CPU to use the process as it’s workload, and finally create the functional execution contexts in the CPU.
 
-binary = "cpu_tests/benchmarks/bin/arm/Bubblesort"
+binary = options.bin
+#binary = "/home/zuoming/projects/gem5/gem5Explore/tests/sieve/sieve"
 
 system.workload = SEWorkload.init_compatible(binary)  # for gem5 V21 and beyond
 

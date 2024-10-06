@@ -1,4 +1,3 @@
-# --------------------------- options ---------------------------#
 import argparse
 
 from caches import *  # import the names from the caches.py file into the namespace
@@ -6,12 +5,20 @@ from caches import *  # import the names from the caches.py file into the namesp
 import m5
 from m5.objects import *
 
+# --------------------------- options ---------------------------#
 parser = argparse.ArgumentParser(
     description="A simple system with 2-level cache."
 )
 parser.add_argument(
-    "binary",
-    default="cpu_tests/benchmarks/bin/arm/Bubblesort",
+    "--isa",
+    default="X86",
+    nargs="?",
+    type=str,
+    help="Instruction set architecture. Choose from what you have built. Default is X86",
+)
+parser.add_argument(
+    "--bin",
+    default="tests/x86/hello/hello",
     nargs="?",
     type=str,
     help="Path to the binary to execute.",
@@ -36,7 +43,14 @@ system.clk_domain.voltage_domain = VoltageDomain()
 system.mem_mode = "timing"
 system.mem_ranges = [AddrRange("512MB")]
 
-system.cpu = ArmTimingSimpleCPU()
+if options.isa == "X86":
+    system.cpu = X86TimingSimpleCPU()
+elif options.isa == "ARM":
+    system.cpu = ArmTimingSimpleCPU()
+elif options.isa == "RISCV":
+    system.cpu = RiscvTimingSimpleCPU()
+else:
+    raise ValueError("{} is not supported ISA.".format(options.isa))
 
 # create L1 caches
 system.cpu.icache = L1ICache(options)
@@ -61,9 +75,10 @@ system.membus = SystemXBar()
 system.l2cache.connectMemSideBus(system.membus)
 
 system.cpu.createInterruptController()
-# system.cpu.interrupts[0].pio = system.membus.mem_side_ports
-# system.cpu.interrupts[0].int_requestor = system.membus.cpu_side_ports
-# system.cpu.interrupts[0].int_responder = system.membus.mem_side_ports
+if options.isa == "X86":
+    system.cpu.interrupts[0].pio = system.membus.mem_side_ports
+    system.cpu.interrupts[0].int_requestor = system.membus.cpu_side_ports
+    system.cpu.interrupts[0].int_responder = system.membus.mem_side_ports
 
 system.system_port = system.membus.cpu_side_ports
 
@@ -73,11 +88,11 @@ system.mem_ctrl.dram.range = system.mem_ranges[0]
 system.mem_ctrl.port = system.membus.mem_side_ports
 
 system.workload = SEWorkload.init_compatible(
-    options.binary
+    options.bin
 )  # for gem5 V21 and beyond
 
 process = Process()
-process.cmd = [options.binary]
+process.cmd = [options.bin]
 system.cpu.workload = process
 system.cpu.createThreads()
 
