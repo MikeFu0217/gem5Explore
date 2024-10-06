@@ -4,6 +4,7 @@ from m5.objects import *
 import sys
 import argparse
 
+# --------------------------- options ---------------------------#
 parser = argparse.ArgumentParser(
     description="A simple system with Timing Simple CPU."
 )
@@ -21,7 +22,16 @@ parser.add_argument(
     type=str,
     help="Path to the binary to execute.",
 )
+parser.add_argument(
+    "--clk",
+    default="1GHz",
+    nargs="?",
+    type=str,
+    help="Clock frequency. Default is 1GHz",
+)
+
 options = parser.parse_args()
+# --------------------------- options ---------------------------#
 
 # The System object will be the parent of all the other objects in our simulated system.
 # The System object contains a lot of functional (not timing level) information,
@@ -32,7 +42,7 @@ system = System()
 # Set the clock on the system
 
 system.clk_domain = SrcClockDomain()
-system.clk_domain.clock = "1GHz"
+system.clk_domain.clock = options.clk
 system.clk_domain.voltage_domain = VoltageDomain()
 
 # We are going to use timing mode for the memory simulation.

@@ -24,6 +24,13 @@ parser.add_argument(
     help="Path to the binary to execute.",
 )
 parser.add_argument(
+    "--clk",
+    default="1GHz",
+    nargs="?",
+    type=str,
+    help="Clock frequency. Default is 1GHz",
+)
+parser.add_argument(
     "--l1i_size", help=f"L1 instruction cache size. Default: 16kB."
 )
 parser.add_argument(
@@ -37,7 +44,7 @@ options = parser.parse_args()
 system = System()
 
 system.clk_domain = SrcClockDomain()
-system.clk_domain.clock = "1GHz"
+system.clk_domain.clock = options.clk
 system.clk_domain.voltage_domain = VoltageDomain()
 
 system.mem_mode = "timing"
