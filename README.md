@@ -43,7 +43,7 @@ A more detailed explanation on options:
 - `--cfg`: Choose the path of the script to run. Path can be relative to your current command line path, or absolute path. Config file should be carefully written to reveice parameters from sim_simple.py.
 - `--bin`: Choose binary file to execute. This file should coorespond to your ISA. Used in script as `system.workload = SEWorkload.init_compatible([bin])` and `process.cmd = [[bin]]`.
 - `--clk`: Clock frequency. Used in script as `system.clk_domain.clock = [clk]`. You can choose like "1GHz", "3GHz" and so on.
-- `--cpu`: Choose from CPU Models supported by gem5. Used in script as `system.cpu = [cpu]`. Options contain: "TimingSimpleCPU" "MinorCPU" "O3CPU"...
+- `--cpu`: Choose from CPU Models supported by gem5. Used in script as `system.cpu = [isa][cpu]`. Options contain: "TimingSimpleCPU" "MinorCPU" "O3CPU"...
 - `--dram`: Choose from dram support by gem5. Used in script as `system.mem_ctrl.dram = [dram]`.
 
 Examples:
